@@ -1,7 +1,7 @@
 app_name = "hatim_carbon"
 app_title = "Hatim Carbon"
 app_publisher = "admin@vintrosys.com"
-app_description = "Migrate items from non-stock to stock amd non-batch to batch\\"
+app_description = "Item config changes"
 app_email = "vintrosys@gmail.com"
 app_license = "mit"
 

@@ -3,7 +3,7 @@ name = "hatim_carbon"
 authors = [
     { name = "admin@vintrosys.com", email = "vintrosys@gmail.com"}
 ]
-description = "Migrate items from non-stock to stock amd non-batch to batch\"
+description = "Item config changes"
 requires-python = ">=3.10"
 readme = "README.md"
 dynamic = ["version"]

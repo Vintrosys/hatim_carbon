@@ -1,6 +1,6 @@
 ### Hatim Carbon
 
-Migrate items from non-stock to stock amd non-batch to batch\\
+Item config changes
 
 ### Installation
 
