@@ -83,7 +83,7 @@ app_license = "mit"
 # ------------
 
 # before_install = "hatim_carbon.install.before_install"
-# after_install = "hatim_carbon.install.after_install"
+after_install = "hatim_carbon.install.after_install"
 
 # Uninstallation
 # ------------
