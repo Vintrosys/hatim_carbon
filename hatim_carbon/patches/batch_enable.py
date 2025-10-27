@@ -9,7 +9,6 @@ def execute():
     "Machined FG Products",
     "Machinery Tools",
     "Oils & Lubricants",
-    "Terminal",
     "Tubes & Rods",
     "Sleeving",
     "Packaging Material",
