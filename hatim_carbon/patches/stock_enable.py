@@ -24,5 +24,5 @@ def execute():
 
         frappe.db.commit()
         print(f"Stock enabled for Item: {item_doc.name}\n")
-	frappe.db.set_value("Item","ST100659","is_stock_item",0)
-	frappe.db.commit()
+    frappe.db.set_value("Item","ST100659","is_stock_item",0)
+    frappe.db.commit()
