@@ -241,4 +241,7 @@ after_install = "hatim_carbon.install.after_install"
 # default_log_clearing_doctypes = {
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
+page_js = {
+    "visual-plant-floor": "public/js/visual_plant_floor.js"
+}
 
