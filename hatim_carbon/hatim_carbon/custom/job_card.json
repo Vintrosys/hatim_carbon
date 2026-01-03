@@ -17,7 +17,7 @@
    "field_name": "barcode",
    "idx": 0,
    "is_system_generated": 1,
-   "modified": "2025-11-28 11:42:30.865030",
+   "modified": "2025-12-29 17:51:35.636492",
    "modified_by": "Administrator",
    "module": null,
    "name": "Job Card-barcode-hidden",
@@ -26,29 +26,6 @@
    "property_type": "Check",
    "row_name": null,
    "value": "0"
-  },
-  {
-   "_assign": null,
-   "_comments": null,
-   "_liked_by": null,
-   "_user_tags": null,
-   "creation": "2025-12-08 16:17:04.430774",
-   "default_value": null,
-   "doc_type": "Job Card",
-   "docstatus": 0,
-   "doctype_or_field": "DocField",
-   "field_name": "employee",
-   "idx": 0,
-   "is_system_generated": 0,
-   "modified": "2025-12-08 16:17:04.430774",
-   "modified_by": "Administrator",
-   "module": null,
-   "name": "Job Card-employee-reqd",
-   "owner": "Administrator",
-   "property": "reqd",
-   "property_type": "Check",
-   "row_name": null,
-   "value": "1"
   }
  ],
  "sync_on_migrate": 1

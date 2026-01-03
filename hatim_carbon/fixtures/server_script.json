@@ -1,0 +1,21 @@
+[
+ {
+  "allow_guest": 0,
+  "api_method": null,
+  "cron_format": null,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Server Script",
+  "doctype_event": "Before Save",
+  "enable_rate_limit": 0,
+  "event_frequency": "All",
+  "modified": "2025-12-29 19:40:08.524293",
+  "module": null,
+  "name": "shipment",
+  "rate_limit_count": 5,
+  "rate_limit_seconds": 86400,
+  "reference_doctype": "Shipment",
+  "script": "# -------------------------------------------------\n# SHIPMENT PACKING LOGIC (Before Save)\n# -------------------------------------------------\n\n# Build Outer Box map using outer_box_no\nouter_box_map = {}\n\nfor ob in doc.outer_boxes:\n    if not ob.outer_box_no:\n        continue\n\n    outer_box_map[ob.outer_box_no] = ob\n    ob.net_weight = 0\n    ob.gross_weight = 0\n\n\n# Process Inner Boxes\nfor ib in doc.inner_boxes:\n\n    # Allow inner boxes without outer box during packing stage\n    if not ib.outer_box:\n        continue\n\n    if ib.outer_box not in outer_box_map:\n        frappe.throw(\n            f\"Inner Box {ib.inner_box_no} linked to invalid Outer Box {ib.outer_box}\"\n        )\n\n    ob = outer_box_map[ib.outer_box]\n\n    # Auto-fill Item Description\n    if ib.item_code and not ib.item_description:\n        ib.item_description = frappe.db.get_value(\n            \"Item\",\n            ib.item_code,\n            \"description\"\n        )\n\n    # Roll-up weights safely\n    ob.net_weight = (ob.net_weight or 0) + (ib.net_weight or 0)\n    ob.gross_weight = (ob.gross_weight or 0) + (ib.gross_weight or 0)\n\n\n# Shipment total weight = sum of all outer box gross weights\ntotal_weight = 0\nfor ob in doc.outer_boxes:\n    total_weight = total_weight + (ob.gross_weight or 0)\n\ndoc.total_weight = total_weight\n",
+  "script_type": "DocType Event"
+ }
+]

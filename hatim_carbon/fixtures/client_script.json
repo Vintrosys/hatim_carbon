@@ -1,0 +1,13 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Shipment",
+  "enabled": 1,
+  "modified": "2026-01-03 10:14:26.577961",
+  "module": null,
+  "name": "shipment",
+  "script": "frappe.ui.form.on(\"Shipment\", {\n    refresh(frm) {\n        set_outer_box_filter(frm);\n    },\n\n    outer_boxes_add(frm) {\n        set_outer_box_filter(frm);\n    },\n\n    outer_boxes_remove(frm) {\n        set_outer_box_filter(frm);\n    }\n});\n\nfunction set_outer_box_filter(frm) {\n    frm.set_query(\"outer_box\", \"inner_boxes\", function () {\n        let outer_boxes = [];\n\n        (frm.doc.outer_boxes || []).forEach(row => {\n            if (row.name) {\n                outer_boxes.push(row.name);\n            }\n        });\n\n        return {\n            filters: {\n                name: [\"in\", outer_boxes]\n            }\n        };\n    });\n}\n\n\n",
+  "view": "Form"
+ }
+]

@@ -245,3 +245,18 @@ page_js = {
     "visual-plant-floor": "public/js/visual_plant_floor.js"
 }
 
+fixtures = [
+    {
+        "dt": "Client Script",
+        "filters": [
+            ["dt", "in", ["Shipment"]]
+        ]
+    },
+    {
+        "dt": "Server Script",
+        "filters": [
+            ["reference_doctype", "=", "Shipment"]
+        ]
+    }
+]
+
