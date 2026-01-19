@@ -245,6 +245,11 @@ page_js = {
     "visual-plant-floor": "public/js/visual_plant_floor.js"
 }
 
+override_doctype_class = {
+    "Shipment": "hatim_carbon.hatim_carbon.overrides.shipment.Shipment"
+}
+
+
 fixtures = [
     {
         "dt": "Client Script",

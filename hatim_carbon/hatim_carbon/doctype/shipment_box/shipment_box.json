@@ -1,40 +1,32 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-12-29 18:01:01.499320",
+ "creation": "2026-01-18 20:10:15.663490",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "outer_box",
   "inner_box_no",
   "box_template",
   "delivery_note",
   "item_code",
   "item_description",
   "qty",
+  "uom",
   "gross_weight",
   "net_weight",
-  "shipment",
-  "packed"
+  "packed",
+  "outer_box"
  ],
  "fields": [
-  {
-   "columns": 1,
-   "fieldname": "outer_box",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Outer Box",
-   "options": "Shipment Outer Box"
-  },
   {
    "columns": 1,
    "fieldname": "inner_box_no",
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Inner Box No"
+   "label": "Inner Box No",
+   "read_only": 1
   },
   {
    "columns": 1,
@@ -93,29 +85,33 @@
    "label": "Net Weight"
   },
   {
-   "fieldname": "shipment",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Shipment",
-   "options": "Shipment"
-  },
-  {
    "default": "0",
    "fieldname": "packed",
    "fieldtype": "Check",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Packed"
+  },
+  {
+   "fieldname": "outer_box",
+   "fieldtype": "Data",
+   "label": "Outer Box"
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "UOM",
+   "options": "UOM"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-18 18:39:57.078290",
+ "modified": "2026-01-19 20:27:04.246927",
  "modified_by": "Administrator",
  "module": "Hatim Carbon",
- "name": "Shipment Inner Box",
+ "name": "Shipment Box",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",

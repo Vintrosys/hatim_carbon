@@ -1,7 +1,7 @@
 [
  {
   "allow_guest": 0,
-  "api_method": null,
+  "api_method": "Get Delivery Note Items",
   "cron_format": null,
   "disabled": 0,
   "docstatus": 0,
@@ -9,13 +9,13 @@
   "doctype_event": "Before Save",
   "enable_rate_limit": 0,
   "event_frequency": "All",
-  "modified": "2025-12-29 19:40:08.524293",
+  "modified": "2026-01-19 20:18:43.648453",
   "module": null,
   "name": "shipment",
   "rate_limit_count": 5,
   "rate_limit_seconds": 86400,
   "reference_doctype": "Shipment",
-  "script": "# -------------------------------------------------\n# SHIPMENT PACKING LOGIC (Before Save)\n# -------------------------------------------------\n\n# Build Outer Box map using outer_box_no\nouter_box_map = {}\n\nfor ob in doc.outer_boxes:\n    if not ob.outer_box_no:\n        continue\n\n    outer_box_map[ob.outer_box_no] = ob\n    ob.net_weight = 0\n    ob.gross_weight = 0\n\n\n# Process Inner Boxes\nfor ib in doc.inner_boxes:\n\n    # Allow inner boxes without outer box during packing stage\n    if not ib.outer_box:\n        continue\n\n    if ib.outer_box not in outer_box_map:\n        frappe.throw(\n            f\"Inner Box {ib.inner_box_no} linked to invalid Outer Box {ib.outer_box}\"\n        )\n\n    ob = outer_box_map[ib.outer_box]\n\n    # Auto-fill Item Description\n    if ib.item_code and not ib.item_description:\n        ib.item_description = frappe.db.get_value(\n            \"Item\",\n            ib.item_code,\n            \"description\"\n        )\n\n    # Roll-up weights safely\n    ob.net_weight = (ob.net_weight or 0) + (ib.net_weight or 0)\n    ob.gross_weight = (ob.gross_weight or 0) + (ib.gross_weight or 0)\n\n\n# Shipment total weight = sum of all outer box gross weights\ntotal_weight = 0\nfor ob in doc.outer_boxes:\n    total_weight = total_weight + (ob.gross_weight or 0)\n\ndoc.total_weight = total_weight\n",
-  "script_type": "DocType Event"
+  "script": "delivery_note = frappe.form_dict.get(\"delivery_note\")\n\nif not delivery_note:\n    frappe.throw(\"Delivery Note is required\")\n\ndn = frappe.get_doc(\"Delivery Note\", delivery_note)\ndn.flags.ignore_permissions = True\n\nitems = []\n\nfor d in dn.items:\n    # ✅ Use REAL child doctype table name\n    used_qty = frappe.db.sql(\"\"\"\n        SELECT COALESCE(SUM(sb.qty), 0)\n        FROM `tabShipment Box` sb\n        INNER JOIN `tabShipment` s ON s.name = sb.parent\n        WHERE\n            s.docstatus = 1\n            AND sb.delivery_note = %s\n            AND sb.item_code = %s\n    \"\"\", (delivery_note, d.item_code))[0][0]\n\n    remaining_qty = d.qty - used_qty\n\n    if remaining_qty <= 0:\n        continue\n\n    items.append({\n        \"delivery_note\": delivery_note,\n        \"item_code\": d.item_code,\n        \"item_name\": d.item_name,\n        \"description\": d.description,\n        \"qty\": remaining_qty,\n        \"uom\": d.uom,\n        \"rate\": d.rate,\n        \"used_qty\": used_qty\n    })\n\nif not items:\n    frappe.throw(\n        \"All items from this Delivery Note are already fully linked to Shipments\"\n    )\n\nfrappe.response[\"message\"] = items\n",
+  "script_type": "API"
  }
 ]
