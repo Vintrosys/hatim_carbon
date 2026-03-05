@@ -253,11 +253,14 @@ override_doctype_class = {
 fixtures = [
     {
         "dt": "Client Script",
-       
-        
+        "filters": [
+            ["name", "=", "Shipment item fetch"]
+        ]
     },
     {
         "dt": "Server Script",
+        "filters": [
+            ["name", "=", "shipment items"]
+        ]
     }
 ]
-

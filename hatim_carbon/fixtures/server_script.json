@@ -1,26 +1,7 @@
 [
  {
   "allow_guest": 0,
-  "api_method": "Get Delivery Note Items",
-  "cron_format": null,
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Server Script",
-  "doctype_event": "Before Save",
-  "enable_rate_limit": 0,
-  "event_frequency": "All",
-  "modified": "2026-03-04 16:58:32.500945",
-  "module": "Hatim Carbon",
-  "name": "shipment",
-  "rate_limit_count": 5,
-  "rate_limit_seconds": 86400,
-  "reference_doctype": "Shipment",
-  "script": "# delivery_note = frappe.form_dict.get(\"delivery_note\")\n\n# if not delivery_note:\n#     frappe.throw(\"Delivery Note is required\")\n\n# dn = frappe.get_doc(\"Delivery Note\", delivery_note)\n# dn.flags.ignore_permissions = True\n\n# items = []\n\n# for d in dn.items:\n#     # ✅ Use REAL child doctype table name\n#     used_qty = frappe.db.sql(\"\"\"\n#         SELECT COALESCE(SUM(sb.qty), 0)\n#         FROM `tabShipment Box` sb\n#         INNER JOIN `tabShipment` s ON s.name = sb.parent\n#         WHERE\n#             s.docstatus = 1\n#             AND sb.delivery_note = %s\n#             AND sb.item_code = %s\n#     \"\"\", (delivery_note, d.item_code))[0][0]\n\n#     remaining_qty = d.qty - used_qty\n\n#     if remaining_qty <= 0:\n#         continue\n\n#     items.append({\n#         \"delivery_note\": delivery_note,\n#         \"item_code\": d.item_code,\n#         \"item_name\": d.item_name,\n#         \"description\": d.description,\n#         \"qty\": remaining_qty,\n#         \"uom\": d.uom,\n#         \"rate\": d.rate,\n#         \"used_qty\": used_qty\n#     })\n\n# if not items:\n#     frappe.throw(\n#         \"All items from this Delivery Note are already fully linked to Shipments\"\n#     )\n\n# frappe.response[\"message\"] = items\n\ndelivery_note = frappe.form_dict.get(\"delivery_note\")\n\nif not delivery_note:\n    frappe.throw(\"Delivery Note is required\")\n\ndn = frappe.get_doc(\"Delivery Note\", delivery_note)\n\nitems = []\n\nfor d in dn.items:\n\n    used_qty = frappe.db.sql(\"\"\"\n        SELECT COALESCE(SUM(sb.qty), 0)\n        FROM `tabShipment Box` sb\n        INNER JOIN `tabShipment` s ON s.name = sb.parent\n        WHERE\n            s.docstatus = 1\n            AND sb.delivery_note = %s\n            AND sb.item_code = %s\n    \"\"\", (delivery_note, d.item_code))[0][0] or 0\n\n    remaining_qty = d.qty - used_qty\n\n    if remaining_qty <= 0:\n        continue\n\n    items.append({\n        \"delivery_note\": delivery_note,\n        \"item_code\": d.item_code,\n        \"item_name\": d.item_name,\n        \"description\": d.description,  # ✅ From Delivery Note\n        \"qty\": remaining_qty,\n        \"uom\": d.uom,\n        \"rate\": d.rate,\n        \"used_qty\": used_qty\n    })\n\nif not items:\n    frappe.throw(\"All items from this Delivery Note are already fully linked to Shipments\")\n\nfrappe.response[\"message\"] = items",
-  "script_type": "API"
- },
- {
-  "allow_guest": 0,
-  "api_method": "get_purchase_order_items",
+  "api_method": "get_shipment_items",
   "cron_format": null,
   "disabled": 0,
   "docstatus": 0,
@@ -28,13 +9,13 @@
   "doctype_event": "Before Insert",
   "enable_rate_limit": 0,
   "event_frequency": "All",
-  "modified": "2026-03-04 12:56:38.400247",
+  "modified": "2026-03-05 15:19:12.993568",
   "module": "Hatim Carbon",
-  "name": "purchase order",
+  "name": "shipment items",
   "rate_limit_count": 5,
   "rate_limit_seconds": 86400,
   "reference_doctype": null,
-  "script": "purchase_order = frappe.form_dict.get(\"purchase_order\")\n\nif not purchase_order:\n    frappe.throw(\"Purchase Order is required\")\n\npo = frappe.get_doc(\"Purchase Order\", purchase_order)\n\nitems = []\n\nfor d in po.items:\n\n    items.append({\n        \"item_code\": d.item_code,\n        \"item_name\": d.item_name,\n        \"description\": d.description,\n        \"qty\": d.qty,\n        \"uom\": d.uom,\n        \"rate\": d.rate\n    })\n\nif not items:\n    frappe.throw(\"No items found in this Purchase Order\")\n\nfrappe.response[\"message\"] = items",
+  "script": "source = frappe.form_dict.get(\"source\")\nreference = frappe.form_dict.get(\"reference\")\n\nif not source or not reference:\n    frappe.throw(\"Source and Reference are required\")\n\nitems = []\n\n# ==========================================================\n# DELIVERY NOTE\n# ==========================================================\n\nif source == \"Delivery Note\":\n\n    dn = frappe.get_doc(\"Delivery Note\", reference)\n\n    for d in dn.items:\n\n        used_qty = frappe.db.sql(\"\"\"\n            SELECT COALESCE(SUM(sb.qty),0)\n            FROM `tabShipment Box` sb\n            INNER JOIN `tabShipment` s ON s.name = sb.parent\n            WHERE\n                s.docstatus = 1\n                AND sb.delivery_note = %s\n                AND sb.item_code = %s\n        \"\"\",(reference,d.item_code))[0][0] or 0\n\n        remaining_qty = d.qty - used_qty\n\n        if remaining_qty <= 0:\n            continue\n\n        items.append({\n            \"item_code\": d.item_code,\n            \"item_name\": d.item_name,\n            \"description\": d.description,\n            \"qty\": remaining_qty,\n            \"uom\": d.uom\n        })\n\n\n# ==========================================================\n# PURCHASE ORDER\n# ==========================================================\n\nif source == \"Purchase Order\":\n\n    po = frappe.get_doc(\"Purchase Order\", reference)\n\n    for d in po.items:\n\n        used_qty = frappe.db.sql(\"\"\"\n            SELECT COALESCE(SUM(sb.qty),0)\n            FROM `tabShipment Box` sb\n            INNER JOIN `tabShipment` s ON s.name = sb.parent\n            WHERE\n                s.docstatus = 1\n                AND sb.purchase_order = %s\n                AND sb.item_code = %s\n        \"\"\",(reference,d.item_code))[0][0] or 0\n\n        remaining_qty = d.qty - used_qty\n\n        if remaining_qty <= 0:\n            continue\n\n        items.append({\n            \"item_code\": d.item_code,\n            \"item_name\": d.item_name,\n            \"description\": d.description,\n            \"qty\": remaining_qty,\n            \"uom\": d.uom\n        })\n\n\nif not items:\n    frappe.throw(\"All items already used in Shipment\")\n\nfrappe.response[\"message\"] = items",
   "script_type": "API"
  }
 ]
