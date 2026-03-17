@@ -254,13 +254,17 @@ fixtures = [
     {
         "dt": "Client Script",
         "filters": [
-            ["name", "=", "Shipment item fetch"]
+            ["name", "in", ["Shipment item fetch", "Shipment Customization"]]
         ]
     },
     {
         "dt": "Server Script",
         "filters": [
-            ["name", "=", "shipment items"]
+            ["name", "in", [
+                "shipment items",
+                "Shipment Purchase order",
+                "Shipment"
+            ]]
         ]
     }
 ]

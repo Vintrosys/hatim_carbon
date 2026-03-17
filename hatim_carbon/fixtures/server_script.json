@@ -1,7 +1,7 @@
 [
  {
   "allow_guest": 0,
-  "api_method": "get_shipment_items",
+  "api_method": "Get Delivery Note Items",
   "cron_format": null,
   "disabled": 0,
   "docstatus": 0,
@@ -9,13 +9,32 @@
   "doctype_event": "Before Insert",
   "enable_rate_limit": 0,
   "event_frequency": "All",
-  "modified": "2026-03-06 14:06:32.147016",
+  "modified": "2026-03-17 10:26:06.864146",
   "module": "Hatim Carbon",
-  "name": "shipment items",
+  "name": "Shipment",
   "rate_limit_count": 5,
   "rate_limit_seconds": 86400,
   "reference_doctype": null,
-  "script": "source = frappe.form_dict.get(\"source\")\nreference = frappe.form_dict.get(\"reference\")\n\nif not source or not reference:\n    frappe.throw(\"Source and Reference are required\")\n\nitems = []\n\n# ==========================================================\n# DELIVERY NOTE\n# ==========================================================\n\nif source == \"Delivery Note\":\n\n    dn = frappe.get_doc(\"Delivery Note\", reference)\n\n    for d in dn.items:\n\n        used_qty = frappe.db.sql(\"\"\"\n            SELECT COALESCE(SUM(sb.qty),0)\n            FROM `tabShipment Box` sb\n            INNER JOIN `tabShipment` s ON s.name = sb.parent\n            WHERE\n                s.docstatus = 1\n                AND sb.delivery_note = %s\n                AND sb.item_code = %s\n        \"\"\",(reference,d.item_code))[0][0] or 0\n\n        remaining_qty = d.qty - used_qty\n\n        if remaining_qty <= 0:\n            continue\n\n        items.append({\n            \"item_code\": d.item_code,\n            \"item_name\": d.item_name,\n            \"description\": d.description,\n            \"qty\": remaining_qty,\n            \"uom\": d.uom\n        })\n\n\n# ==========================================================\n# PURCHASE ORDER\n# ==========================================================\n\nif source == \"Purchase Order\":\n\n    po = frappe.get_doc(\"Purchase Order\", reference)\n\n    for d in po.items:\n\n        used_qty = frappe.db.sql(\"\"\"\n            SELECT COALESCE(SUM(sb.qty),0)\n            FROM `tabShipment Box` sb\n            INNER JOIN `tabShipment` s ON s.name = sb.parent\n            WHERE\n                s.docstatus = 1\n                AND sb.purchase_order = %s\n                AND sb.item_code = %s\n        \"\"\",(reference,d.item_code))[0][0] or 0\n\n        remaining_qty = d.qty - used_qty\n\n        if remaining_qty <= 0:\n            continue\n\n        items.append({\n            \"item_code\": d.item_code,\n            \"item_name\": d.item_name,\n            \"description\": d.description,\n            \"qty\": remaining_qty,\n            \"uom\": d.uom\n        })\n\n\nif not items:\n    frappe.throw(\"All items already used in Shipment\")\n\nfrappe.response[\"message\"] = items",
+  "script": "delivery_note = frappe.form_dict.get(\"delivery_note\")\n\nif not delivery_note:\n    frappe.throw(\"Delivery Note is required\")\n\ndn = frappe.get_doc(\"Delivery Note\", delivery_note)\n\nitems = []\n\nfor d in dn.items:\n\n    shipment_boxes = frappe.db.sql(\"\"\"\n        SELECT COALESCE(SUM(sb.qty),0) as used_qty\n        FROM `tabShipment Box` sb\n        INNER JOIN `tabShipment` s ON s.name = sb.parent\n        WHERE\n            sb.delivery_note = %s\n            AND sb.item_code = %s\n            AND s.docstatus = 1\n    \"\"\", (delivery_note, d.item_code), as_dict=True)\n\n    used_qty = shipment_boxes[0].used_qty if shipment_boxes else 0\n\n    remaining_qty = (d.qty or 0) - used_qty\n\n    if remaining_qty <= 0:\n        continue\n\n    items.append({\n        \"delivery_note\": delivery_note,\n        \"item_code\": d.item_code,\n        \"item_name\": d.item_name,\n        \"description\": d.description,\n        \"qty\": remaining_qty,\n        \"uom\": d.uom,\n        \"rate\": d.rate,\n        \"used_qty\": used_qty\n    })\n\nif not items:\n    frappe.throw(\"All items from this Delivery Note are already fully linked to Shipments\")\n\nfrappe.response[\"message\"] = items\n",
+  "script_type": "API"
+ },
+ {
+  "allow_guest": 0,
+  "api_method": "get_purchase_order_items",
+  "cron_format": null,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Server Script",
+  "doctype_event": "Before Insert",
+  "enable_rate_limit": 0,
+  "event_frequency": "All",
+  "modified": "2026-03-17 11:35:55.126479",
+  "module": "Hatim Carbon",
+  "name": "Shipment Purchase order",
+  "rate_limit_count": 5,
+  "rate_limit_seconds": 86400,
+  "reference_doctype": null,
+  "script": "purchase_order = frappe.form_dict.get(\"purchase_order\")\n\nif not purchase_order:\n    frappe.throw(\"Purchase Order is required\")\n\npo = frappe.get_doc(\"Purchase Order\", purchase_order)\n\nitems = []\n\nfor d in po.items:\n\n    description = d.description or \"\"\n\n    # Clean Quill HTML\n    description = description.replace(\"<div class=\\\"ql-editor read-mode\\\">\", \"\")\n    description = description.replace(\"<div class=\\\"ql-editor\\\">\", \"\")\n    description = description.replace(\"</div>\", \"\")\n    description = description.replace(\"<p>\", \"\")\n    description = description.replace(\"</p>\", \"\\n\")\n    description = description.replace(\"<br>\", \"\\n\")\n    description = description.replace(\"<br/>\", \"\\n\")\n    description = description.replace(\"&nbsp;\", \" \")\n\n    items.append({\n        \"purchase_order\": purchase_order,\n        \"item_code\": d.item_code,\n        \"item_name\": d.item_name,\n        \"description\": description.strip(),\n        \"qty\": d.qty,\n        \"uom\": d.uom,\n        \"schedule_date\": d.schedule_date\n        \n    })\n\nfrappe.response[\"message\"] = items",
   "script_type": "API"
  }
 ]
