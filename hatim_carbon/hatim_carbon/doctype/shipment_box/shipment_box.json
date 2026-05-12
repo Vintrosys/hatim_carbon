@@ -9,6 +9,7 @@
   "inner_box_no",
   "box_template",
   "delivery_note",
+  "purchase_order",
   "item_code",
   "item_description",
   "qty",
@@ -101,13 +102,19 @@
    "fieldtype": "Link",
    "label": "UOM",
    "options": "UOM"
+  },
+  {
+   "fieldname": "purchase_order",
+   "fieldtype": "Link",
+   "label": "Purchase order",
+   "options": "Purchase Order"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-19 20:46:36.848566",
+ "modified": "2026-03-04 17:34:28.371467",
  "modified_by": "Administrator",
  "module": "Hatim Carbon",
  "name": "Shipment Box",

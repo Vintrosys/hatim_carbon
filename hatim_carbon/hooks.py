@@ -254,14 +254,17 @@ fixtures = [
     {
         "dt": "Client Script",
         "filters": [
-            ["dt", "in", ["Shipment"]]
+            ["name", "in", ["Shipment item fetch", "Shipment Customization"]]
         ]
     },
     {
         "dt": "Server Script",
         "filters": [
-            ["reference_doctype", "=", "Shipment"]
+            ["name", "in", [
+                "shipment items",
+                "Shipment Purchase order",
+                "Shipment"
+            ]]
         ]
     }
 ]
-
