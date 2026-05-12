@@ -3,13 +3,11 @@
 import frappe
 from frappe import _
 from frappe.contacts.doctype.contact.contact import get_default_contact
-from frappe.model.document import Document
-from frappe.utils import flt, get_time
-
 from erpnext.accounts.party import get_party_shipping_address
+from erpnext.stock.doctype.shipment.shipment import Shipment as ShipmentBase
 
 
-class Shipment(Document):
+class Shipment(ShipmentBase):
     # begin: auto-generated types
     # This code is auto-generated. Do not modify anything in this block.
 
@@ -71,59 +69,11 @@ class Shipment(Document):
         # 🔹 Custom logic BEFORE
         frappe.logger().info("Custom Shipment validate from hatim_carbon")
 
-        # ---- ORIGINAL LOGIC ----
-        self.validate_weight()
-        self.validate_pickup_time()
-        self.set_value_of_goods()
-        self.set_total_weight()
-
-        if self.docstatus == 0:
-            self.status = "Draft"
+        super().validate()
 
         # 🔹 Custom logic AFTER
         # example:
         # self.custom_flag = 1
-
-    # Uncomment if you want to override submit behavior
-    # def on_submit(self):
-    #     if not self.shipment_parcel:
-    #         frappe.throw(_("Please enter Shipment Parcel information"))
-    #     if self.value_of_goods == 0:
-    #         frappe.throw(_("Value of goods cannot be 0"))
-    #     self.db_set("status", "Submitted")
-
-    def on_cancel(self):
-        self.db_set("status", "Cancelled")
-
-    def validate_weight(self):
-        for parcel in self.shipment_parcel:
-            if flt(parcel.weight) <= 0:
-                frappe.throw(_("Parcel weight cannot be 0"))
-
-    def set_total_weight(self):
-        self.total_weight = self.get_total_weight()
-
-    def get_total_weight(self):
-        return sum(
-            flt(parcel.weight) * parcel.count
-            for parcel in self.shipment_parcel
-            if parcel.count > 0
-        )
-
-    def validate_pickup_time(self):
-        if (
-            self.pickup_from
-            and self.pickup_to
-            and get_time(self.pickup_to) < get_time(self.pickup_from)
-        ):
-            frappe.throw(_("Pickup To time should be greater than Pickup From time"))
-
-    def set_value_of_goods(self):
-        value_of_goods = 0
-        for entry in self.get("shipment_delivery_note"):
-            value_of_goods += flt(entry.get("grand_total"))
-
-        self.value_of_goods = value_of_goods if value_of_goods else self.value_of_goods
 
     
 
