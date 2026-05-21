@@ -252,19 +252,46 @@ override_doctype_class = {
 
 fixtures = [
     {
+        "dt": "Custom Field"
+    },
+    {
         "dt": "Client Script",
         "filters": [
-            ["name", "in", ["Shipment item fetch", "Shipment Customization"]]
+            [
+                "name",
+                "in",
+                [
+                    "shipment",
+                    "Dn to Shipmetn",
+                    "Shipment Customization",
+                    "Shipment item fetch",
+                    "outer box calculation",
+                    "Job Card Employee Filter",
+                    "Email account won't work warning",
+                    "site-form"
+                ]
+            ]
         ]
     },
     {
         "dt": "Server Script",
         "filters": [
-            ["name", "in", [
-                "shipment items",
-                "Shipment Purchase order",
-                "Shipment"
-            ]]
+            [
+                "name",
+                "in",
+                [
+                    "Dn to Shipment",
+                    "Shipment Fix",
+                    "Shipment Purchase order",
+                    "Shipment",
+                    "purchase order",
+                    "planned_target_card",
+                    "Annual Sales Target – Period Integrity",
+                    "Annual Sales Target – Validation & Band Assignment",
+                    "Annual Sales Target – Build Revision History",
+                    "Annual Sales Target – Active Version Enforcement"
+                ]
+            ]
         ]
     }
 ]
